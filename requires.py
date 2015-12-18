@@ -17,9 +17,9 @@ from charms.reactive import hook
 from charms.reactive import scopes
 
 
-class HDFSRequires(RelationBase):
+class YARNRequires(RelationBase):
     scope = scopes.GLOBAL
-    auto_accessors = ['ip_addr', 'port', 'webhdfs-port']
+    auto_accessors = ['ip_addr', 'port', 'hs_http', 'hs_ipc']
 
     def set_spec(self, spec):
         """
@@ -34,26 +34,27 @@ class HDFSRequires(RelationBase):
         conv = self.conversation()
         return json.loads(conv.get_remote('spec', '{}'))
 
-    def hdfs_ready(self):
+    def yarn_ready(self):
         conv = self.conversation()
-        return conv.get_remote('hdfs-ready', 'false').lower() == 'true'
+        return conv.get_remote('yarn-ready', 'false').lower() == 'true'
 
-    @hook('{requires:hdfs}-relation-joined')
+    @hook('{requires:yarn}-relation-joined')
     def joined(self):
         conv = self.conversation()
         conv.set_state('{relation_name}.related')
 
-    @hook('{requires:hdfs}-relation-changed')
+    @hook('{requires:yarn}-relation-changed')
     def changed(self):
         conv = self.conversation()
-        available = all([self.spec(), self.ip_addr(), self.port(), self.webhdfs_port()])
+        available = all([self.spec(), self.ip_addr(), self.port(), 
+                        self.hs_http(), self.hs_ipc()])
         spec_matches = self._spec_match()
-        ready = self.hdfs_ready()
+        ready = self.yarn_ready()
 
         conv.toggle_state('{relation_name}.spec.mismatch', available and not spec_matches)
         conv.toggle_state('{relation_name}.ready', available and spec_matches and ready)
 
-    @hook('{requires:hdfs}-relation-{departed,broken}')
+    @hook('{requires:yarn}-relation-{departed,broken}')
     def departed(self):
         self.remove_state('{relation_name}.related')
         self.remove_state('{relation_name}.spec.mismatch')

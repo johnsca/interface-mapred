@@ -15,17 +15,20 @@ import json
 from charms.reactive import RelationBase
 from charms.reactive import hook
 from charms.reactive import scopes
+from charms.reactive.bus import get_states
 
+from charmhelpers.core import hookenv
 
-class HDFSProvides(RelationBase):
+class YARNProvides(RelationBase):
     scope = scopes.UNIT
 
-    @hook('{provides:hdfs}-relation-joined')
+    @hook('{provides:yarn}-relation-joined')
     def joined(self):
         conv = self.conversation()
         conv.set_state('{relation_name}.related')
+        hookenv.log('States: {}'.format(get_states().keys()))
 
-    @hook('{provides:hdfs}-relation-departed')
+    @hook('{provides:yarn}-relation-departed')
     def departed(self):
         conv = self.conversation()
         conv.remove_state('{relation_name}.related')
@@ -38,13 +41,14 @@ class HDFSProvides(RelationBase):
         for conv in self.conversations():
             conv.set_remote('ip_addr', ip_addr)
 
-    def send_ports(self, port, webhdfs_port):
+    def send_ports(self, port, hs_http, hs_ipc):
         for conv in self.conversations():
             conv.set_remote(data={
                 'port': port,
-                'webhdfs-port': webhdfs_port,
+                'hs_http': hs_http,
+                'hs_ipc': hs_ipc,
             })
 
     def send_ready(self, ready=True):
         for conv in self.conversations():
-            conv.set_remote('hdfs-ready', ready)
+            conv.set_remote('yarn-ready', ready)
