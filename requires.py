@@ -21,7 +21,7 @@ class YARNRequires(RelationBase):
     scope = scopes.GLOBAL
     auto_accessors = ['ip_addr', 'port', 'hs_http', 'hs_ipc']
 
-    def set_spec(self, spec):
+    def set_local_spec(self, spec):
         """
         Set the local spec.
 
@@ -30,9 +30,13 @@ class YARNRequires(RelationBase):
         conv = self.conversation()
         conv.set_local('spec', json.dumps(spec))
 
-    def spec(self):
+    def local_spec(self):
         conv = self.conversation()
-        return json.loads(conv.get_remote('spec', '{}'))
+        return json.loads(conv.get_local('spec', 'null'))
+
+    def remote_spec(self):
+        conv = self.conversation()
+        return json.loads(conv.get_remote('spec', 'null'))
 
     def yarn_ready(self):
         conv = self.conversation()
@@ -46,8 +50,12 @@ class YARNRequires(RelationBase):
     @hook('{requires:yarn}-relation-changed')
     def changed(self):
         conv = self.conversation()
-        available = all([self.spec(), self.ip_addr(), self.port(), 
-                        self.hs_http(), self.hs_ipc()])
+        available = all([
+            self.remote_spec() is not None,
+            self.ip_addr(),
+            self.port(),
+            self.hs_http(),
+            self.hs_ipc()])
         spec_matches = self._spec_match()
         ready = self.yarn_ready()
 
@@ -61,9 +69,11 @@ class YARNRequires(RelationBase):
         self.remove_state('{relation_name}.ready')
 
     def _spec_match(self):
-        conv = self.conversation()
-        local_spec = json.loads(conv.get_local('spec', '{}'))
-        remote_spec = json.loads(conv.get_remote('spec', '{}'))
+        local_spec = self.local_spec()
+        remote_spec = self.remote_spec()
+        if None in (local_spec, remote_spec):
+            return False
         for key, value in local_spec.items():
             if value != remote_spec.get(key):
                 return False
+        return True
