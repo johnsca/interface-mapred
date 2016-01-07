@@ -1,46 +1,48 @@
 # Overview
 
-This interface layer handles the communication with HDFS via the `hdfs` interface
+This interface layer handles the communication with YARN via the `yarn` interface
 protocol.  It is intended for internal use within the Hadoop cluster charms.
-For typical usage, [interface-hadoop-plugin][] should be used instead.
+!!!! For typical usage, [interface-hadoop-plugin][] should be used instead. !!!! 
+^ Above line soon deprecated?
 
 
 # Usage
 
 ## Requires
 
-Charms requiring this interface can be clients, DataNodes, or SecondaryNameNodes.
-Clients simply depend on HDFS to serve as a distributed file system to them, while
-DataNodes and SecondaryNameNodes register to provide additional services back.
+Charms requiring this interface can be clients, or NodeManagers.
+Clients simply depend on YARN to provide as a distributed compute to them, while
+NodeManagers register to provide additional services back.
 
 This interface layer will set the following states, as appropriate:
 
-  * `{relation_name}.related` The relation is established, but HDFS may not yet
+  * `{relation_name}.related` The relation is established, but YARN may not yet
     have provided any connection or service information.
 
-  * `{relation_name}.available` HDFS has provided its connection and service
-    information, but is not yet ready to serve as a distributed file system.
+  * `{relation_name}.available` YARN has provided its connection and service
+    information, but is not yet ready to provide compute services.
     The provided information can be accessed via the following methods:
       * `ip_addr()`
       * `port()`
-      * `webhdfs_port()`
+      * `hs_http()`
+      * `hs_ipc()`
 
-  * `{relation_name}.ready` HDFS is fully ready to serve as a distributed file
-    system.
+  * `{relation_name}.ready` YARN is fully ready to provide distributed computing 
+    services.
 
-For example, a typical client would respond to `hdfs.ready`:
+For example, a typical client would respond to `yarn.ready`:
 
 ```python
-@when('flume.installed', 'hdfs.ready')
-def hdfs_ready(hdfs):
-    flume.configure(hdfs)
+@when('flume.installed', 'yarn.ready')
+def yarn_ready(yarn):
+    flume.configure(yarn)
     flume.start()
 ```
 
 
 ## Provides
 
-A charm providing this interface is providing the HDFS service.
+A charm providing this interface is providing the YARN service.
 
 This interface layer will set the following states, as appropriate:
 
@@ -49,21 +51,21 @@ This interface layer will set the following states, as appropriate:
     appropriate information to the clients:
       * `send_spec(spec)`
       * `send_ip_addr(ip_addr)`
-      * `send_ports(port, webhdfs_port)`
+      * `send_ports(port, webyarn_port)`
       * `send_ready(ready)`
 
 Example:
 
 ```python
 @when('client.related')
-@when('hdfs.ready')
+@when('yarn.ready')
 def serve_client(client):
     client.send_spec(utils.build_spec())
-    client.send_ports(dist_config.get('port'), dist_config.get('webhdfs_port'))
+    client.send_ports(dist_config.get('port'), dist_config.get('webyarn_port'))
     client.send_ready(True)
 
 @when('client.related')
-@when_not('hdfs.ready')
+@when_not('yarn.ready')
 def check_ready(client):
     client.send_ready(False)
 ```
