@@ -3,7 +3,6 @@
 This interface layer handles the communication with YARN via the `yarn` interface
 protocol.  It is intended for internal use within the Hadoop cluster charms.
 !!!! For typical usage, [interface-hadoop-plugin][] should be used instead. !!!! 
-^ Above line soon deprecated?
 
 
 # Usage
