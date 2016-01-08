@@ -19,6 +19,7 @@ from charms.reactive.bus import get_states
 
 from charmhelpers.core import hookenv
 
+
 class YARNProvides(RelationBase):
     scope = scopes.UNIT
 
@@ -37,9 +38,9 @@ class YARNProvides(RelationBase):
         for conv in self.conversations():
             conv.set_remote('spec', json.dumps(spec))
 
-    def send_ip_addr(self, ip_addr):
+    def send_resourcemanagers(self, resourcemanagers):
         for conv in self.conversations():
-            conv.set_remote('ip_addr', ip_addr)
+            conv.set_remote('resourcemanagers', json.dumps(resourcemanagers))
 
     def send_ports(self, port, hs_http, hs_ipc):
         for conv in self.conversations():
@@ -52,3 +53,7 @@ class YARNProvides(RelationBase):
     def send_ready(self, ready=True):
         for conv in self.conversations():
             conv.set_remote('yarn-ready', ready)
+
+    def send_hosts_map(self, hosts_map):
+        for conv in self.conversations():
+            conv.set_remote('hosts-map', json.dumps(hosts_map))
