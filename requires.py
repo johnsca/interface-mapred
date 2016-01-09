@@ -15,6 +15,8 @@ import json
 from charms.reactive import RelationBase
 from charms.reactive import hook
 from charms.reactive import scopes
+from charms.reactive.bus import get_states
+from charmhelpers.core import hookenv
 
 
 class YARNRequires(RelationBase):
@@ -68,6 +70,15 @@ class YARNRequires(RelationBase):
     @hook('{requires:yarn}-relation-changed')
     def changed(self):
         conv = self.conversation()
+        hookenv.log('Data: {}'.format({
+            'remote_spec': self.remote_spec(),
+            'local_spec': self.local_spec(),
+            'hosts-map': self.hosts_map(),
+            'resourcemanagers': self.resourcemanagers(),
+            'port': self.port(),
+            'hs_http': self.hs_http(),
+            'hs_ipc': self.hs_ipc(),
+        }))
         available = all([
             self.remote_spec() is not None,
             self.hosts_map(),
@@ -80,6 +91,8 @@ class YARNRequires(RelationBase):
 
         conv.toggle_state('{relation_name}.spec.mismatch', available and not spec_matches)
         conv.toggle_state('{relation_name}.ready', available and spec_matches and ready)
+
+        hookenv.log('States: {}'.format(set(get_states().keys())))
 
     @hook('{requires:yarn}-relation-departed')
     def departed(self):
