@@ -15,24 +15,20 @@ import json
 from charms.reactive import RelationBase
 from charms.reactive import hook
 from charms.reactive import scopes
-from charms.reactive.bus import get_states
-
-from charmhelpers.core import hookenv
 
 
-class YARNProvides(RelationBase):
+class MapredProvides(RelationBase):
     scope = scopes.UNIT
 
-    @hook('{provides:yarn}-relation-joined')
+    @hook('{provides:mapred}-relation-joined')
     def joined(self):
         conv = self.conversation()
-        conv.set_state('{relation_name}.related')
-        hookenv.log('States: {}'.format(get_states().keys()))
+        conv.set_state('{relation_name}.clients')
 
-    @hook('{provides:yarn}-relation-departed')
+    @hook('{provides:mapred}-relation-departed')
     def departed(self):
         conv = self.conversation()
-        conv.remove_state('{relation_name}.related')
+        conv.remove_state('{relation_name}.clients')
 
     def send_spec(self, spec):
         for conv in self.conversations():
@@ -46,14 +42,14 @@ class YARNProvides(RelationBase):
         for conv in self.conversations():
             conv.set_remote(data={
                 'port': port,
-                'hs_http': hs_http,
-                'hs_ipc': hs_ipc,
+                'historyserver_http': hs_http,
+                'historyserver_ipc': hs_ipc,
             })
 
     def send_ready(self, ready=True):
         for conv in self.conversations():
-            conv.set_remote('yarn-ready', ready)
+            conv.set_remote('has_slave', ready)
 
     def send_hosts_map(self, hosts_map):
         for conv in self.conversations():
-            conv.set_remote('hosts-map', json.dumps(hosts_map))
+            conv.set_remote('etc_hosts', json.dumps(hosts_map))

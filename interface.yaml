@@ -1,4 +1,4 @@
-name: yarn 
+name: mapred
 summary: Interface for relating to Apache YARN
 version: 1
 maintainer: "Big Data Team <bigdata@lists.ubuntu.com>"
