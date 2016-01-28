@@ -19,9 +19,9 @@ from charms.reactive.bus import get_states
 from charmhelpers.core import hookenv
 
 
-class YARNRequires(RelationBase):
+class MapredRequires(RelationBase):
     scope = scopes.GLOBAL
-    auto_accessors = ['port', 'hs_http', 'hs_ipc']
+    auto_accessors = ['port', 'historyserver_http', 'historyserver_ipc']
 
     def set_local_spec(self, spec):
         """
@@ -42,7 +42,7 @@ class YARNRequires(RelationBase):
 
     def yarn_ready(self):
         conv = self.conversation()
-        return conv.get_remote('yarn-ready', 'false').lower() == 'true'
+        return conv.get_remote('has_slave', 'false').lower() == 'true'
 
     def resourcemanagers(self):
         """
@@ -60,14 +60,20 @@ class YARNRequires(RelationBase):
         that they are resolvable.
         """
         conv = self.conversation()
-        return json.loads(conv.get_remote('hosts-map', '{}'))
+        return json.loads(conv.get_remote('etc_hosts', '{}'))
 
-    @hook('{requires:yarn}-relation-joined')
+    def hs_http(self):
+        return self.historyserver_http()
+
+    def hs_ipc(self):
+        return self.historyserver_ipc()
+
+    @hook('{requires:mapred}-relation-joined')
     def joined(self):
         conv = self.conversation()
         conv.set_state('{relation_name}.related')
 
-    @hook('{requires:yarn}-relation-changed')
+    @hook('{requires:mapred}-relation-changed')
     def changed(self):
         conv = self.conversation()
         hookenv.log('Data: {}'.format({
@@ -94,7 +100,7 @@ class YARNRequires(RelationBase):
 
         hookenv.log('States: {}'.format(set(get_states().keys())))
 
-    @hook('{requires:yarn}-relation-departed')
+    @hook('{requires:mapred}-relation-departed')
     def departed(self):
         self.remove_state('{relation_name}.related')
         self.remove_state('{relation_name}.spec.mismatch')
