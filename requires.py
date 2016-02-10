@@ -21,7 +21,7 @@ from charmhelpers.core import hookenv
 
 class MapredRequires(RelationBase):
     scope = scopes.GLOBAL
-    auto_accessors = ['port', 'historyserver_http', 'historyserver_ipc']
+    auto_accessors = ['port', 'historyserver-http', 'historyserver-ipc']
 
     def set_local_spec(self, spec):
         """
@@ -49,7 +49,11 @@ class MapredRequires(RelationBase):
         Returns a list of the ResourceManager host names.
         """
         conv = self.conversation()
-        return json.loads(conv.get_remote('resourcemanagers', '[]'))
+        resourcemanagers = json.loads(conv.get_remote('resourcemanagers', '[]'))
+        if self.yarn_ready() and not resourcemanagers:
+            # temporary work-around for connecting with old, non-layered charms
+            resourcemanagers = [unit.replace('/', '-') for unit in conv.units]
+        return resourcemanagers
 
     def hosts_map(self):
         """
