@@ -42,8 +42,8 @@ class MapredProvides(RelationBase):
         for conv in self.conversations():
             conv.set_remote(data={
                 'port': port,
-                'historyserver_http': hs_http,
-                'historyserver_ipc': hs_ipc,
+                'historyserver-http': hs_http,
+                'historyserver-ipc': hs_ipc,
             })
 
     def send_ready(self, ready=True):
