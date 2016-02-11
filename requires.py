@@ -51,7 +51,8 @@ class MapredRequires(RelationBase):
         conv = self.conversation()
         resourcemanagers = json.loads(conv.get_remote('resourcemanagers', '[]'))
         if self.yarn_ready() and not resourcemanagers:
-            resourcemanagers = [conv.get_remote('private-address', '[]')]
+            # temporary work-around for connecting with old, non-layered charms
+            resourcemanagers = [unit.replace('/', '-') for unit in conv.units]
         return resourcemanagers
 
     def hosts_map(self):
