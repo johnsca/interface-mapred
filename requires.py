@@ -49,7 +49,8 @@ class MapredRequires(RelationBase):
         Returns a list of the ResourceManager host names.
         """
         conv = self.conversation()
-        resourcemanagers = json.loads(conv.get_remote('resourcemanagers', '[]'))
+        resourcemanagers = json.loads(
+            conv.get_remote('resourcemanagers', '[]'))
         if self.yarn_ready() and not resourcemanagers:
             # temporary work-around for connecting with old, non-layered charms
             resourcemanagers = [unit.replace('/', '-') for unit in conv.units]
@@ -96,11 +97,11 @@ class MapredRequires(RelationBase):
             self.port(),
             self.hs_http(),
             self.hs_ipc()])
-        spec_matches = self._spec_match()
-        ready = self.yarn_ready()
+        spec_mismatch = available and not self._spec_match()
+        ready = available and self.yarn_ready()
 
-        conv.toggle_state('{relation_name}.spec.mismatch', available and not spec_matches)
-        conv.toggle_state('{relation_name}.ready', available and spec_matches and ready)
+        conv.toggle_state('{relation_name}.spec.mismatch', spec_mismatch)
+        conv.toggle_state('{relation_name}.ready', ready and not spec_mismatch)
 
         hookenv.log('States: {}'.format(set(get_states().keys())))
 
