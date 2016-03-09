@@ -2,7 +2,7 @@
 
 This interface layer handles the communication with YARN via the `mapred` interface
 protocol.  It is intended for internal use within the Hadoop cluster charms.
-!!!! For typical usage, [interface-hadoop-plugin][] should be used instead. !!!! 
+!!!! For typical usage, [interface-hadoop-plugin][] should be used instead. !!!!
 
 
 # Usage
@@ -15,13 +15,13 @@ NodeManagers register to provide additional services back.
 
 This interface layer will set the following states, as appropriate:
 
-  * `{relation_name}.related` The relation is established, but YARN may not yet
+  * `{relation_name}.joined` The relation is established, but YARN may not yet
     have provided any connection or service information.
 
-  * `{relation_name}.joined` YARN has provided its connection and service
+  * `{relation_name}.ready` YARN has provided its connection and service
     information, and is ready to provide compute services.
     The provided information can be accessed via the following methods:
-      * `ip_addr()`
+      * `hosts_map()`
       * `port()`
       * `hs_http()`
       * `hs_ipc()`
@@ -46,8 +46,8 @@ This interface layer will set the following states, as appropriate:
     been related.  The charm should call the following methods to provide the
     appropriate information to the clients:
       * `send_spec(spec)`
-      * `send_ip_addr(ip_addr)`
-      * `send_ports(port, webyarn_port)`
+      * `send_hosts_map(hosts)`
+      * `send_ports(port, historyserver_web_port, historyserver_ipc_port)`
       * `send_ready(ready)`
 
 Example:
