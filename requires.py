@@ -27,7 +27,7 @@ class MapredRequires(RelationBase):
         """
         Set the local spec.
 
-        Should be called after ``{relation_name}.related``.
+        Should be called after ``{relation_name}.joined``.
         """
         conv = self.conversation()
         conv.set_local('spec', json.dumps(spec))
@@ -76,7 +76,7 @@ class MapredRequires(RelationBase):
     @hook('{requires:mapred}-relation-joined')
     def joined(self):
         conv = self.conversation()
-        conv.set_state('{relation_name}.related')
+        conv.set_state('{relation_name}.joined')
 
     @hook('{requires:mapred}-relation-changed')
     def changed(self):
@@ -107,7 +107,7 @@ class MapredRequires(RelationBase):
 
     @hook('{requires:mapred}-relation-departed')
     def departed(self):
-        self.remove_state('{relation_name}.related')
+        self.remove_state('{relation_name}.joined')
         self.remove_state('{relation_name}.spec.mismatch')
         self.remove_state('{relation_name}.ready')
 

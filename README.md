@@ -18,16 +18,13 @@ This interface layer will set the following states, as appropriate:
   * `{relation_name}.related` The relation is established, but YARN may not yet
     have provided any connection or service information.
 
-  * `{relation_name}.available` YARN has provided its connection and service
-    information, but is not yet ready to provide compute services.
+  * `{relation_name}.joined` YARN has provided its connection and service
+    information, and is ready to provide compute services.
     The provided information can be accessed via the following methods:
       * `ip_addr()`
       * `port()`
       * `hs_http()`
       * `hs_ipc()`
-
-  * `{relation_name}.ready` YARN is fully ready to provide distributed computing 
-    services.
 
 For example, a typical client would respond to `{relation_name}.ready`:
 
